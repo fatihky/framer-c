@@ -58,39 +58,39 @@ int main(int argc, char *argv[]) {
       assert (frm_fl_is_empty (fl));
     }
 
-    // it ("can fill an iov") {
-    //   fl = frm_fl_new (2);
-    //   assert (fl != NULL);
-    //   res = frm_fl_add (fl, &frame);
-    //   assert (res);
-    //   assert (!frm_fl_is_empty (fl));
-    //   frm_fl_fill_iovs(fl, iovs, 4, &retiovcnt);
-    //   assert (retiovcnt == 2);
-    //   assert (iovs[0].iov_len == 4);
-    //   assert (iovs[0].iov_base == &frame.size);
-    //   assert (iovs[1].iov_len == 5);
-    //   assert (iovs[1].iov_base == frame.buf);
-    // }
+    it ("can fill an iov") {
+      fl = frm_fl_new (2);
+      assert (fl != NULL);
+      res = frm_fl_add (fl, &frame);
+      assert (res);
+      assert (!frm_fl_is_empty (fl));
+      frm_fl_fill_iovs(fl, iovs, 4, &retiovcnt);
+      assert (retiovcnt == 2);
+      assert (iovs[0].iov_len == 4);
+      assert (iovs[0].iov_base == &frame.size);
+      assert (iovs[1].iov_len == 5);
+      assert (iovs[1].iov_base == frame.buf);
+    }
 
-    // it ("can fill an iov with two frames") {
-    //   fl = frm_fl_new (2);
-    //   assert (fl != NULL);
-    //   res = frm_fl_add (fl, &frame);
-    //   assert (res);
-    //   res = frm_fl_add (fl, &frame);
-    //   assert (res);
-    //   assert (!frm_fl_is_empty (fl));
-    //   frm_fl_fill_iovs(fl, iovs, 4, &retiovcnt);
-    //   assert (retiovcnt == 4);
-    //   assert (iovs[0].iov_len == 4);
-    //   assert (iovs[0].iov_base == &frame.size);
-    //   assert (iovs[1].iov_len == 5);
-    //   assert (iovs[1].iov_base == frame.buf);
-    //   assert (iovs[2].iov_len == 4);
-    //   assert (iovs[2].iov_base == &frame.size);
-    //   assert (iovs[3].iov_len == 5);
-    //   assert (iovs[3].iov_base == frame.buf);
-    // }
+    it ("can fill an iov with two frames") {
+      fl = frm_fl_new (2);
+      assert (fl != NULL);
+      res = frm_fl_add (fl, &frame);
+      assert (res);
+      res = frm_fl_add (fl, &frame);
+      assert (res);
+      assert (!frm_fl_is_empty (fl));
+      frm_fl_fill_iovs(fl, iovs, 4, &retiovcnt);
+      assert (retiovcnt == 4);
+      assert (iovs[0].iov_len == 4);
+      assert (iovs[0].iov_base == &frame.size);
+      assert (iovs[1].iov_len == 5);
+      assert (iovs[1].iov_base == frame.buf);
+      assert (iovs[2].iov_len == 4);
+      assert (iovs[2].iov_base == &frame.size);
+      assert (iovs[3].iov_len == 5);
+      assert (iovs[3].iov_base == frame.buf);
+    }
 
     it ("can fill iovs after writes") {
       fl = frm_fl_new (2);
