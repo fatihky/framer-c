@@ -26,6 +26,7 @@ struct frm_frame {
 
 void frm_frame_init(struct frm_frame *self);
 void frm_frame_term(struct frm_frame *self);
+void frm_frame_ref(struct frm_frame *self);
 int frm_frame_totlen(struct frm_frame *self);
 
 /**

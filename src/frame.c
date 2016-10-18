@@ -31,6 +31,11 @@ int frm_frame_totlen(struct frm_frame *self) {
   return self->size + 4; // size + sizeof(int)
 }
 
+void frm_frame_ref(struct frm_frame *self) {
+  assert (self->ref >= 0);
+  self->ref++;
+}
+
 void frm_frame_unref(struct frm_frame *self) {
   assert (self->ref >= 0);
   self->ref--;
