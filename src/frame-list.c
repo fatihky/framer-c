@@ -92,6 +92,7 @@ bool frm_fl_bulk_add (struct frm_fl_bulk *self, struct frm_frame *fr) {
   if (self->size == self->capacity)
     return false; // full
 
+  frm_frame_ref(fr);
   self->frames[self->lastidx] = fr;
   self->cursors[self->lastidx] = 0;
   self->size++;
