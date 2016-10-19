@@ -4,6 +4,7 @@
 #include <errno.h>
 #include "parser.h"
 #include "util.h"
+#include "fast.h"
 
 static inline struct frm_frame *_create_frame_copy(struct frm_frame *src)
                                         __attribute__((always_inline));
@@ -85,7 +86,7 @@ int frm_parser_parse (struct frm_parser *self, struct frm_cbuf *cbuf, int *bufsz
     if (*frm_cursor < 4) {
       needed = 4 - *frm_cursor;
       towrite = frm_min(remaining, needed);
-      if (towrite == 4)
+      if (frm_fast(towrite == 4))
         fr->size = *(int *)ptr;
       else
         memcpy(((char *)&fr->size) + *frm_cursor, ptr, towrite);
@@ -95,12 +96,12 @@ int frm_parser_parse (struct frm_parser *self, struct frm_cbuf *cbuf, int *bufsz
       ptr += towrite;
     }
 
-    if (remaining == 0 || *frm_cursor < 4) break;
+    if (frm_slow(remaining == 0 || *frm_cursor < 4)) break;
 
     needed = fr->size - *frm_cursor + 4;
     towrite = frm_min(remaining, needed);
 
-    if (fr->size == towrite && embed_allow) {
+    if (frm_fast(fr->size == towrite && embed_allow)) {
       frm_cbuf_ref(cbuf);
       fr->buf = ptr;
       fr->type = FRM_FRAME_EMBEDDED;
@@ -108,7 +109,7 @@ int frm_parser_parse (struct frm_parser *self, struct frm_cbuf *cbuf, int *bufsz
     else {
       if (fr->buf == NULL) {
         fr->buf = malloc(fr->size);
-        if (fr->buf == NULL) {
+        if (frm_slow(fr->buf == NULL)) {
           *bufsz = remaining;
           return ENOMEM;
         }
