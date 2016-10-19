@@ -20,6 +20,16 @@ long long ustime(void) {
 
 #define mstime() (ustime() /1000)
 
+// static struct frm_frame fakeframe;
+static struct frm_frame *frames = NULL;
+static int framecursor = 0;
+
+struct frm_frame *frm_cb (struct frm_parser *self) {
+  (void)self;
+  return &frames[framecursor++];
+  // return &fakeframe;
+}
+
 int main(int argc, char *argv[]) {
   // buffer setup
   char *buf = malloc(9 * 1e7);
@@ -33,9 +43,11 @@ int main(int argc, char *argv[]) {
   // parser setup
   struct frm_parser parser;
   struct frm_cbuf cbuf;
+  frames = malloc(sizeof (struct frm_frame) * 1e7);
   cbuf.buf = buf;
   int rc = frm_parser_init (&parser, 0);
   assert (rc == 0);
+  parser.frm_cb = frm_cb;
   int bufsz = 9 * 1e7;
   long long start = mstime();
   rc = frm_parser_parse (&parser, &cbuf, &bufsz);

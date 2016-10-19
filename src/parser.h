@@ -5,6 +5,8 @@ struct frm_parser {
   int embed_allow;
   struct frm_frame curr_frame;
   struct frm_fl in_frames;
+  void *data;
+  struct frm_frame *(*frm_cb)(struct frm_parser *self);
 };
 
 int frm_parser_init (struct frm_parser *self, int embed_allow);

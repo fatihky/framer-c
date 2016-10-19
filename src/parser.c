@@ -6,10 +6,15 @@
 #include "util.h"
 #include "fast.h"
 
-static inline struct frm_frame *_create_frame_copy(struct frm_frame *src)
-                                        __attribute__((always_inline));
-static inline int _push_frame_if_complete(struct frm_parser *self, int *frm_cursor,
-                  struct frm_frame *src, int *bufsz, int remaining) __attribute__((always_inline));
+static struct frm_frame *default_frm_cb(struct frm_parser *self);
+
+static inline struct frm_frame *_create_frame_copy(struct frm_parser *self,
+    struct frm_frame *(*frm_cb)(struct frm_parser *self), struct frm_frame *src)
+  __attribute__((always_inline));
+static inline int _push_frame_if_complete(struct frm_parser *self,
+    struct frm_frame *(*frm_cb)(struct frm_parser *self), int *frm_cursor,
+    struct frm_frame *src, int *bufsz, int remaining)
+    __attribute__((always_inline));
 
 int frm_parser_init (struct frm_parser *self, int embed_allow) {
   int rc;
@@ -17,11 +22,20 @@ int frm_parser_init (struct frm_parser *self, int embed_allow) {
   self->embed_allow = embed_allow;
   frm_frame_init(&self->curr_frame);
   rc = frm_fl_init (&self->in_frames, 100);
+  self->data = NULL;
+  self->frm_cb = NULL;
   return rc;
 }
 
-static inline struct frm_frame *_create_frame_copy(struct frm_frame *src) {
-  struct frm_frame *copy = malloc(sizeof (struct frm_frame));
+static struct frm_frame *default_frm_cb(struct frm_parser *self) {
+  (void)self;
+  return malloc(sizeof (struct frm_frame));
+}
+
+static inline struct frm_frame *_create_frame_copy(struct frm_parser *self,
+    struct frm_frame *(*frm_cb)(struct frm_parser *self),
+    struct frm_frame *src) {
+  struct frm_frame *copy =  frm_cb(self); //malloc(sizeof (struct frm_frame));
   if (copy == NULL)
     return NULL;
 
@@ -31,13 +45,14 @@ static inline struct frm_frame *_create_frame_copy(struct frm_frame *src) {
 }
 
 static inline int _push_frame_if_complete(struct frm_parser *self,
+    struct frm_frame *(*frm_cb)(struct frm_parser *self),
     int *frm_cursor, struct frm_frame *fr, int *bufsz, int remaining) {
 
   struct frm_frame *copy;
 
   if ((*frm_cursor - 4) == fr->size) {
     // allocate new frame and copy current frame's contents to it
-    copy = _create_frame_copy(fr);
+    copy = _create_frame_copy(self, frm_cb, fr);
     if (copy == NULL)
       goto fail1;
 
@@ -67,7 +82,8 @@ fail1:
  * just give copy's pointer.
  */
 
-int frm_parser_parse (struct frm_parser *self, struct frm_cbuf *cbuf, int *bufsz) {
+int frm_parser_parse (struct frm_parser *self, struct frm_cbuf *cbuf,
+    int *bufsz) {
   int rc;
   int towrite;
   int needed;
@@ -77,8 +93,12 @@ int frm_parser_parse (struct frm_parser *self, struct frm_cbuf *cbuf, int *bufsz
   char *ptr = cbuf->buf;
   int *frm_cursor = &self->curr_cursor;
   int parsed_frames = 0;
+  struct frm_frame *(*frm_cb)(struct frm_parser *);
 
-  rc = _push_frame_if_complete(self, frm_cursor, fr, bufsz, remaining);
+  frm_cb = self->frm_cb ? self->frm_cb : default_frm_cb;
+
+  rc = _push_frame_if_complete(self, frm_cb, frm_cursor, fr, bufsz, remaining);
+
   if (rc == -1)
     return rc;
 
@@ -121,7 +141,8 @@ int frm_parser_parse (struct frm_parser *self, struct frm_cbuf *cbuf, int *bufsz
     ptr += towrite;
     *frm_cursor += towrite;
     remaining -= towrite;
-    rc = _push_frame_if_complete(self, frm_cursor, fr, bufsz, remaining);
+    rc = _push_frame_if_complete(self, frm_cb, frm_cursor, fr, bufsz,
+          remaining);
     if (rc == 1)
       parsed_frames++;
     else if (rc != 0)
