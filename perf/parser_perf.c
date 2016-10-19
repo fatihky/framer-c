@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
   struct frm_cbuf cbuf;
   frames = malloc(sizeof (struct frm_frame) * 2e7);
   cbuf.buf = buf;
-  int rc = frm_parser_init (&parser, 0);
+  int rc = frm_parser_init (&parser, 1);
   assert (rc == 0);
   parser.frm_cb = frm_cb;
   int bufsz = 9 * 2e7;
