@@ -1,16 +1,12 @@
-#include <parser.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include <time.h>
 #include <assert.h>
-#include <sys/wait.h>
 #include <errno.h>
-#include <string.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <arpa/inet.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <sys/time.h>
+
+#include <parser.h>
 
 long long ustime(void) {
   struct timeval tv;
