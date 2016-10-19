@@ -32,10 +32,10 @@ struct frm_frame *frm_cb (struct frm_parser *self) {
 
 int main(int argc, char *argv[]) {
   // buffer setup
-  char *buf = malloc(9 * 2e7);
+  char *buf = malloc(9 * 4e7);
   char *ptr = buf;
   int len = 5;
-  for (int i = 0; i < 2e7; i++) {
+  for (int i = 0; i < 4e7; i++) {
     memcpy(ptr, &len, 4);
     memcpy(ptr + 4, "fatih", 5);
     ptr += 9;
@@ -43,16 +43,16 @@ int main(int argc, char *argv[]) {
   // parser setup
   struct frm_parser parser;
   struct frm_cbuf cbuf;
-  frames = malloc(sizeof (struct frm_frame) * 2e7);
+  frames = malloc(sizeof (struct frm_frame) * 4e7);
   cbuf.buf = buf;
   int rc = frm_parser_init (&parser, 1);
   assert (rc == 0);
   parser.frm_cb = frm_cb;
-  int bufsz = 9 * 2e7;
+  int bufsz = 9 * 4e7;
   long long start = mstime();
   rc = frm_parser_parse (&parser, &cbuf, &bufsz);
   long long endms = mstime();
-  assert (rc == 2e7);
-  printf("parsing %d frames took %lldms\n", (int)2e7, endms - start);
+  assert (rc == 4e7);
+  printf("parsing %d frames took %lldms\n", (int)4e7, endms - start);
   return 0;
 }
